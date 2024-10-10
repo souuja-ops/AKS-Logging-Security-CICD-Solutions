@@ -111,3 +111,31 @@ kubectl expose service grafana --type=LoadBalancer --name=grafana-loadbalancer -
 * Select Loki.
 * Set the URL to http://loki:3100/.
 * Click Save & Test.
+
+## Step 4: Verify the End-to-End Logging Setup
+
+### Deploy a test application to generate logs:
+```bash
+kubectl run my-app --image=nginx --namespace=default
+```
+### Query logs in Grafana:
+* Go to Explore in Grafana.
+* Use the query:
+```bash
+{namespace="default", container="my-app"}
+```
+
+## Optional: Set Up Alerts in Grafana
+### Configure Alerting
+* Go to Alerting -> Notification Channels.
+* Add a notification channel (e.g., email, Slack).
+
+### Define Alert Rules
+Create alert rules based on log queries, for example:
+
+```bash
+expr: sum(rate({job="nginx"}[5m])) > 5
+for: 5m
+labels:
+  severity: critical
+```
