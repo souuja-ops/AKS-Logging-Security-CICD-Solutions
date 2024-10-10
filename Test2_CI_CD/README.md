@@ -34,7 +34,7 @@ kubectl get pods --namespace tekton-pipelines
 ## Step 2: Define the Tekton Pipeline
 The Tekton pipeline will consist of tasks such as cloning the repository, building the application, and deploying it to AKS.
 
-## Create a GitHub Secret (Optional)
+### Create a GitHub Secret (Optional)
 If your source code is in a private GitHub repository, create a secret for authentication:
 ```bash
 kubectl create secret generic github-secret \
@@ -42,7 +42,7 @@ kubectl create secret generic github-secret \
   --from-literal=password=<your-token> \
   --namespace=tekton-pipelines
 ```  
-## Pipeline Configuration (pipeline.yaml)
+### Pipeline Configuration (pipeline.yaml)
 Below is an example of the pipeline configuration for Tekton to build and deploy to AKS:
 ```bash
 apiVersion: tekton.dev/v1beta1
@@ -90,20 +90,20 @@ spec:
 workspaces:
   - name: shared-workspace
 ```  
-## Tasks Overview:
+### Tasks Overview:
 * fetch-repository: This task clones the source code from the Git repository.
 * build-and-push: Builds the application using Kaniko and pushes the Docker image to a container registry.
 * deploy-to-aks: Deploys the built image to the AKS cluster using kubectl.
 
-### Step 3: Apply the Pipeline and Resources
+## Step 3: Apply the Pipeline and Resources
 
-## Apply the Tekton Pipeline
+### Apply the Tekton Pipeline
 Run the following command to apply the pipeline to your AKS cluster:
 ```bash
 kubectl apply -f pipeline.yaml -n tekton-pipelines
 ``` 
 
-## Create PipelineRun (pipeline-run.yaml)
+### Create PipelineRun (pipeline-run.yaml)
 A PipelineRun triggers the pipeline execution. 
 ```bash
 apiVersion: tekton.dev/v1beta1
@@ -120,25 +120,25 @@ spec:
         claimName: tekton-pvc
   serviceAccountName: pipeline-service-account
 ```  
-## Apply the PipelineRun
+### Apply the PipelineRun
 Apply the PipelineRun to start the pipeline:
 ```bash
 kubectl apply -f pipeline-run.yaml -n tekton-pipelines
 ```
-### Step 4: Monitoring and Verifying the Pipeline
-## Monitor Pipeline Execution
+## Step 4: Monitoring and Verifying the Pipeline
+### Monitor Pipeline Execution
 Use Tekton CLI (tkn) to monitor the pipeline run:
 ```bash
 tkn pipelinerun logs aks-deployment-pipeline-run -f -n tekton-pipelines
 ```
 This will display the logs of each task in real-time.
 
-## Verify Deployment on AKS
+### Verify Deployment on AKS
 Once the pipeline completes, check if the application is running on AKS:
 ```bash
 kubectl get pods -n <your-app-namespace>
 ```
-### Step 5: Clean Up
+## Step 5: Clean Up
 After testing clean up the Tekton resources:
 ```bash
 kubectl delete pipelinerun aks-deployment-pipeline-run -n tekton-pipelines
