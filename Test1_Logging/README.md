@@ -27,3 +27,34 @@ helm repo update
 ```bash
 kubectl create namespace logging
 ```
+### Install Promtail as a DaemonSet
+```bash
+helm install promtail grafana/promtail --namespace=logging --set "loki.serviceName=loki"
+```
+### Promtail Configuration (promtail-config.yaml)
+This is an example configuration file for Promtail to collect logs from Kubernetes pods:
+```bash
+server:
+  http_listen_port: 9080
+
+positions:
+  filename: /var/log/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: kubernetes-pods
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        target_label: app
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+```
+### Verify Promtail Installation
+Ensure Promtail is running as a DaemonSet:
+```bash
+kubectl get daemonsets -n logging
+```
