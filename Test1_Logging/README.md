@@ -58,3 +58,56 @@ Ensure Promtail is running as a DaemonSet:
 ```bash
 kubectl get daemonsets -n logging
 ```
+
+## Step 2: Install Loki (Log Aggregator)
+
+**Loki** is the central component responsible for aggregating logs.
+
+### Install Loki Using Helm
+```bash
+helm install loki grafana/loki-stack --namespace=logging --set promtail.enabled=false
+```
+### Loki Storage Configuration
+This example configures Loki to use a filesystem for storage:
+```bash
+storage_config:
+  boltdb_shipper:
+    active_index_directory: /loki/index
+    cache_location: /loki/boltdb-cache
+    shared_store: filesystem
+
+schema_config:
+  configs:
+    - from: 2020-10-24
+      store: boltdb-shipper
+      object_store: filesystem
+      schema: v11
+      index:
+        prefix: index_
+        period: 24h
+```
+### Verify Loki Logs
+Check the logs of the Loki pod:
+```bash
+kubectl logs -l app=loki -n logging
+```
+
+
+## Step 3: Install Grafana (Log Visualization)
+
+**Grafana** is used for querying and visualizing logs aggregated by Loki.
+
+### Install Grafana Using Helm
+```bash
+helm install grafana grafana/grafana --namespace=logging
+```
+### Expose Grafana Service
+```bash
+kubectl expose service grafana --type=LoadBalancer --name=grafana-loadbalancer -n logging
+```
+### Add Loki as a Data Source in Grafana
+* Log into Grafana (default credentials: admin/admin).
+* Navigate to Configuration -> Data Sources -> Add Data Source.
+* Select Loki.
+* Set the URL to http://loki:3100/.
+* Click Save & Test.
